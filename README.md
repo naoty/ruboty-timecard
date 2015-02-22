@@ -7,4 +7,5 @@ A handler for [Ruboty](https://github.com/r7kamura/ruboty) to punch a timecard.
 ```ruby
 # Gemfile
 gem "ruboty-timecard"
+gem "ruboty-google-spreadsheet", require: "ruboty/google_spreadsheet"
 ```
