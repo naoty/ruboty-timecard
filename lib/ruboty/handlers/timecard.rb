@@ -3,7 +3,7 @@ require "date"
 module Ruboty
   module Handlers
     class Timecard < Base
-      DATE_FORMAT = "%Y-%m-%d"
+      DATE_FORMAT = "%Y/%m/%d"
       DATETIME_FORMAT = "%H:%M"
       SEPARATOR = " ~ "
 
@@ -11,9 +11,9 @@ module Ruboty
 
       def punch(message)
         @member = message.from || "Anonymous"
-        storage[1, member_index] = @member
-        storage[date_index, 1] = date_timestamp
-        storage[date_index, member_index] = timestamp
+        storage[member_row, member_column] = @member
+        storage[date_row, date_column] = today_timestamp
+        storage[date_row, member_column] = timestamp
       end
 
       private
@@ -22,21 +22,33 @@ module Ruboty
         robot.brain.data[0]
       end
 
-      def member_index
-        member_index = storage.rows[0].find_index(@member)
-        if member_index.nil?
-          storage.num_cols + 1
+      def member_row
+        1
+      end
+
+      def member_column
+        if storage.num_rows > 0
+          member_index = storage.rows[0].find_index(@member)
+          member_index.nil? ? storage.num_cols + 1 : member_index + 1
         else
-          member_index + 1
+          2
         end
       end
 
-      def date_index
-        latest_date = Date.parse(storage[storage.num_rows, 1])
-        latest_date == Date.today ? storage.num_rows : storage.num_rows + 1
+      def date_column
+        1
       end
 
-      def date_timestamp
+      def date_row
+        begin
+          latest_date = Date.parse(storage[storage.num_rows, 1])
+          latest_date == Date.today ? storage.num_rows : storage.num_rows + 1
+        rescue
+          2
+        end
+      end
+
+      def today_timestamp
         Time.now.strftime(DATE_FORMAT)
       end
 
@@ -45,7 +57,7 @@ module Ruboty
       end
 
       def start_time
-        value = storage[member_index, date_index]
+        value = storage[date_row, member_column]
         if value.empty?
           Time.now.strftime(DATETIME_FORMAT)
         else
