@@ -10,7 +10,7 @@ module Ruboty
       on //, all: true, name: "punch", description: "punch a timecard"
 
       def punch(message)
-        @member = message.from || "Anonymous"
+        @member = message.from_name || "Anonymous"
         storage[member_row, member_column] = @member
         storage[date_row, date_column] = today_timestamp
         storage[date_row, member_column] = timestamp
